@@ -3,8 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Include the Yoco SDK in your web page -->
-    <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
     <script defer src="lib/js/brands.js"></script>
@@ -46,7 +44,7 @@
         }
       }
     </style>
-    <title>Wifi Cafe</title>
+    <title>Wifi Cafe SignIn</title>
   </head>
   <body>
     <div id="globe"></div>
@@ -55,59 +53,10 @@
       <div class="hero-body">
         <div class="columns has-text-light">
           <div class="column is-half">
-            <p class="title is-2 has-text-centered">Community Wi-Fi</p>
+            <p class="title is-2 has-text-centered">Sign in @ Wi-Fi Cafe</p>
             <p class="subtitle is-3 has-text-centered">
               Internet access for all
             </p>
-
-            <div id="profile">
-              <div
-                class="is-flex is-flex-direction-column is-align-items-center"
-              >
-                <div class="is-flex m-6">
-                  <figure class="image is-48x48 is-round">
-                    <img
-                      class="is-rounded"
-                      src="https://bulma.io/images/placeholders/96x96.png"
-                      alt="Placeholder image"
-                    />
-                  </figure>
-                  <div class="ml-3">
-                    <p class="title is-4">John Smith</p>
-                    <p class="subtitle is-6">@johnsmith</p>
-                  </div>
-                </div>
-
-                <p class="is-align-self-flex-end mt-6">
-                  Available data<span class="p-3 is-size-4 has-text-weight-bold"
-                    >125MB</span
-                  >
-                </p>
-              </div>
-
-              <div class="field has-addons">
-                <div class="control is-expanded">
-                  <div class="select is-fullwidth">
-                    <select name="country">
-                      <option value="Argentina">1GB - R20</option>
-                      <option value="Bolivia">2GB - R30</option>
-                      <option value="Brazil">3GB - R40</option>
-                      <option value="Chile">5GB - R50</option>
-                      <option value="Colombia">6GB - R60</option>
-                      <option value="Ecuador">7GB - R70</option>
-                      <option value="Guyana">8GB - R80</option>
-                      <option value="Paraguay">10GB - R90</option>
-                      <option value="Peru">12GB - R100</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="control">
-                  <button id="checkout" type="submit" class="button is-primary">
-                    <i class="fas fa-shopping-cart"></i>&nbsp;Get more data
-                  </button>
-                </div>
-              </div>
-            </div>
 
             <div class="content is-small has-text-centered">
               <p>
@@ -138,6 +87,27 @@
                 More...
               </button>
             </div>
+
+            <div id="login-buttons">
+              <button
+                onclick="signIn('facebook')"
+                class="button is-link is-rounded is-fullwidth mb-3"
+              >
+                <i class="fab fa-facebook"></i>&nbsp;Sign in with Facebook
+              </button>
+              <button
+                onclick="signIn('twitter')"
+                class="button is-info is-rounded is-fullwidth mb-3"
+              >
+                <i class="fab fa-twitter"></i>&nbsp;Sign in with Twitter
+              </button>
+              <button
+                onclick="signIn('google')"
+                class="button is-success is-rounded is-fullwidth mb-3"
+              >
+                <i class="fab fa-google"></i>&nbsp;Sign in with Google
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -151,42 +121,17 @@
       const SUPABASE_URL = "https://jbkvhjjbsckelgmadinx.supabase.co";
       const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      const yoco = new window.YocoSDK({
-        publicKey: "pk_test_ed3c54a6gOol69qa7f45",
-      });
-
-      const user = supabase.auth.user();
-      const amountInCents = 2799;
-      const email = "eugevanz@gmail.com";
-
-      async function signout() {
-        const { error } = await _supabase.auth.signOut();
-        console.log(error);
-      }
-
-      function checkout() {
-        yoco.showPopup({
-          amountInCents: amountInCents,
-          currency: "ZAR",
-          name: "Community Wi-Fi",
-          description: email,
-          metadata: { email: email },
-          callback: function (result) {
-            // This function returns a token that your server can use to capture a payment
-            if (result.error) {
-              const errorMessage = result.error.message;
-              alert("error occurred: " + errorMessage);
-            } else {
-              fetch(
-                `https://yoco-charge-tccfm66ixq-uc.a.run.app?token=${result.id}&amountInCents=${amountInCents}`
-              )
-                .then((res) => res.json())
-                .then((value) => alert(JSON.stringify(value)));
-            }
-            // In a real integration - you would now pass this chargeToken back to your
-            // server along with the order/basket that the customer has purchased.
-          },
-        });
+      function signIn(provider) {
+        _supabase.auth
+          .signIn({
+            provider: provider,
+          })
+          .then((response) => {
+            response.error ? alert(response.error.message) : null;
+          })
+          .catch((err) => {
+            alert(err.response.text);
+          });
       }
 
       function showMore() {
